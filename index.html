@@ -78,7 +78,7 @@ h2:first-child{margin-top:4px}
 .ex.ok{background:#eff9ef;border-color:var(--pink-l)}
 .ex-h{display:flex;gap:12px;align-items:center}
 .ex-art{width:96px;height:96px;flex:none;overflow:hidden;border:1px solid var(--line);border-radius:5px;background:var(--rose)}
-.ex-art svg{display:block;width:100%;height:100%}
+.ex-art img{display:block;width:100%;height:100%;object-fit:cover}
 .ex-copy{flex:1;min-width:0}
 .ex-pills{display:flex;gap:4px;flex-wrap:wrap}
 .ex h3{font-size:16px;font-weight:800;line-height:1.25}
@@ -559,37 +559,12 @@ function muscleSVG(group){
   return `<svg viewBox="0 0 220 200" style="width:100%;max-width:240px;height:auto;display:block;margin:8px auto 0" role="img" aria-label="Músculos que trabaja: ${esc(group)}">${front}${back}
    <text x="50" y="199" font-size="9" fill="var(--muted)" text-anchor="middle" font-weight="700">Frente</text><text x="170" y="199" font-size="9" fill="var(--muted)" text-anchor="middle" font-weight="700">Espalda</text></svg>`;
 }
+function exerciseSlug(name){
+  return name.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+}
 function exerciseArt(name){
-  const n=name.toLowerCase();
-  let pose="pull";
-  if(/caminata lateral|sentadilla|hip thrust|peso muerto|prensa|femoral|abducción|patada|puente|extensión de cadera|buenos días/.test(n))pose="legs";
-  else if(/cardio|bicicleta|elíptica|caminata inclinada/.test(n))pose="cardio";
-  else if(/dead bug|pallof|plancha|bird dog|crunch|hollow|leñador|elevación alterna de pierna/.test(n))pose="core";
-  else if(/curl/.test(n))pose="curl";
-  else if(/press|tríceps|extensión|elevaciones|pájaros/.test(n))pose="press";
-  else if(/jalón|remo|face pull|pullover|retracción escapular/.test(n))pose="pull";
-  const scenes={
-    pull:`<path d="M15 76h91M99 19v55M95 19h9" fill="none" stroke="#909590" stroke-width="4" stroke-linecap="round"/>
-      <path d="M99 25L76 42M73 40l6 5" fill="none" stroke="#2c302e" stroke-width="2"/>
-      <path d="M34 70h52" stroke="#537a5a" stroke-width="5" stroke-linecap="round"/>
-      <circle cx="49" cy="31" r="7" fill="#e9b995"/><path d="M49 39l7 17 18-12M55 56l-13 13M55 56l22 10M49 42l-9 10 5 5" fill="none" stroke="#537a5a" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M76 44l-3-4m3 4 4-2" stroke="#2c302e" stroke-width="3" stroke-linecap="round"/>`,
-    curl:`<circle cx="59" cy="20" r="7" fill="#e9b995"/><path d="M59 28v25m0-16-14 11 2 12m12-23 13 9-2 12M59 53 49 76m10-23 11 23" fill="none" stroke="#537a5a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M47 56v-7m0 0-5-3m5 3 5-3M70 56v-7m0 0-5-3m5 3 5-3" fill="none" stroke="#2c302e" stroke-width="3" stroke-linecap="round"/>`,
-    press:`<path d="M41 74h38m-31 0v-9m24 9v-9" fill="none" stroke="#909590" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="60" cy="34" r="7" fill="#e9b995"/><path d="M60 42v19m0-12-13-14V24m13 25 13-14V24M60 61l-11 13m11-13 11 13" fill="none" stroke="#537a5a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M47 24v-8m-5 0h10m21 8v-8m-5 0h10" stroke="#2c302e" stroke-width="3" stroke-linecap="round"/>`,
-    legs:`<path d="M22 76h77" stroke="#909590" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="58" cy="24" r="7" fill="#e9b995"/><path d="M57 32l-7 19 13 8m-13-8-16 7m16-7 15 14 12-10m-14-4 18 2" fill="none" stroke="#537a5a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M31 57h-8m-3 0h3m57-8 9 2m4 0h-4" stroke="#2c302e" stroke-width="3" stroke-linecap="round"/>`,
-    core:`<path d="M16 74h88" stroke="#909590" stroke-width="4" stroke-linecap="round"/>
-      <circle cx="31" cy="50" r="7" fill="#e9b995"/><path d="M38 52l22 5 18-4m-40 1 11 14m17-10 13 10m-40-14 2 14" fill="none" stroke="#537a5a" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M26 73h8m32 0h8" stroke="#2c302e" stroke-width="3" stroke-linecap="round"/>`,
-    cardio:`<circle cx="37" cy="65" r="17" fill="none" stroke="#909590" stroke-width="3"/><circle cx="86" cy="65" r="17" fill="none" stroke="#909590" stroke-width="3"/>
-      <path d="M37 65l15-22 14 22H37l16-1 16-21 17 22m-17-22h13" fill="none" stroke="#537a5a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="58" cy="22" r="7" fill="#e9b995"/><path d="M58 30l8 13 13-4m-13 4-12 9m12-9 7 19m-7-19-4 14" fill="none" stroke="#2c302e" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>`
-  };
-  return `<div class="ex-art"><svg viewBox="0 0 120 96" role="img" aria-label="Ilustración esquemática: ${esc(name)}"><rect width="120" height="96" fill="#e1e6e1"/>${scenes[pose]}</svg></div>`;
+  const src=`img/ejercicios/${exerciseSlug(name)}.jpg`;
+  return `<div class="ex-art"><img src="${src}" alt="Imagen de ${esc(name)}" onerror="this.onerror=null;this.src='img/exercise-generic.jpg'" loading="lazy"></div>`;
 }
 function avatarHTML(size){
   const a=state.avatar;
